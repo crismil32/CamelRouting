@@ -1,0 +1,26 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:camel="http://camel.apache.org/schema/spring"
+       xsi:schemaLocation="
+          http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+          http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+		
+		<bean id="cleanupRecord" class="com.v2retail.filehandling.FileOperation" />
+		
+		<bean id="startPolicy" class="org.apache.camel.routepolicy.quartz2.CronScheduledRoutePolicy">
+			<property name="routeStartTime" value="0 15 16 * * ?"/>
+		</bean>
+		
+		<camelContext xmlns="http://camel.apache.org/schema/spring">
+			<!-- Define your routing rules here-->
+			<route id="BackUP_Route" routePolicyRef="startPolicy" autoStartup="false" >
+			<from uri="file://C:\\LOG?noop=true&amp;delay=1000" />
+			
+			<setHeader headerName="CLEANUPRECORD">
+				<simple>${bean:cleanupRecord?method=cleanupOldRecord()}</simple>
+			</setHeader>
+			
+			<log message="Route End: BackUP_Route"/>
+			</route>						
+		</camelContext>
+</beans>
